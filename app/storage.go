@@ -10,5 +10,5 @@ type StorageValue struct {
 	ExpireAt time.Time
 }
 
-var SetStorage = map[string]StorageValue{}
-var SetMutex = sync.RWMutex{}
+var Storage = map[string]StorageValue{}
+var StorageMutex = sync.RWMutex{}

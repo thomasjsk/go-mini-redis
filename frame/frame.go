@@ -9,7 +9,7 @@ import (
 
 type Frame interface {
 	Encode() []byte
-	Unpack() (command string, args []string)
+	Unpack() (command string, args []string, buf []byte)
 }
 
 type RawFrame []byte
@@ -25,18 +25,24 @@ func (rawFrame *RawFrame) Decode(cursor *int) (frame Frame, err error) {
 	case "*":
 		return rawFrame.DecodeArray(cursor)
 	default:
-		return nil, errors.New("Unsupported frame type: " + frameType)
+		fmt.Println("RawFrame.Decode -> default")
+		return rawFrame.DecodeBytes(cursor)
 	}
+}
+
+func (rawFrame *RawFrame) DecodeBytes(_ *int) (frame *BytesFrame, err error) {
+	return &BytesFrame{Value: *rawFrame}, nil
 }
 
 func (rawFrame *RawFrame) DecodeSimpleString(cursor *int) (frame *SimpleString, err error) {
 	line, err := rawFrame.readLine(cursor)
+	fmt.Println("line", line, *cursor)
 
 	if err != nil {
 		return &SimpleString{}, err
 	}
 
-	return &SimpleString{Value: strings.ToLower(line)}, nil
+	return &SimpleString{Value: strings.ToLower(line[1:])}, nil
 }
 
 func (rawFrame *RawFrame) DecodeBulkString(cursor *int) (frame *BulkString, err error) {
